@@ -49,7 +49,6 @@ jobs:
           echo "jwt.secret=${{ secrets.JWT_SECRET }}" > src/main/resources/application.properties
           echo "spring.datasource.url=${{ secrets.DB_URL }}" >> src/main/resources/application.properties
 
-
       # 5. Maven build
       - name: Build with Maven
         run: mvn -Dmaven.test.skip=true clean package
