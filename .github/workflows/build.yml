@@ -47,20 +47,6 @@ jobs:
       - name: Build with Maven
         run: mvn -Dmaven.test.skip=true clean package
 
-      - name: Diagnose missing application.properties
-        run: |
-          echo "ATTENTION: The 'application.properties' file was not found at its expected location."
-          echo "Searching the repository for the file. Look for the output below."
-          
-          # Search the entire workspace for the file and print results
-          find . -name "*application.properties"
-          
-          # We'll continue the workflow, but the Docker build will likely fail 
-          # until the path is corrected in the Dockerfile.
-          
-          # Note: We must still ensure the main jar is readable for the Docker build
-          chmod a+r target/*.jar || true
-
       # 6. Docker login
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
