@@ -47,18 +47,19 @@ jobs:
       - name: Build with Maven
         run: mvn -Dmaven.test.skip=true clean package
 
-      - name: Verify file permissions and readability
+      - name: Diagnose missing application.properties
         run: |
-          echo "Checking permissions for application.properties..."
-          # List the file's permissions (l) and path (a)
-          ls -la src/main/resources/application.properties
-
-          # Force set read permissions for all users just in case
-          chmod a+r src/main/resources/application.properties
-
-          echo "Reading file content to confirm access..."
-          # Cat the file to ensure the runner can read it fully
-          cat src/main/resources/application.properties
+          echo "ATTENTION: The 'application.properties' file was not found at its expected location."
+          echo "Searching the repository for the file. Look for the output below."
+          
+          # Search the entire workspace for the file and print results
+          find . -name "*application.properties"
+          
+          # We'll continue the workflow, but the Docker build will likely fail 
+          # until the path is corrected in the Dockerfile.
+          
+          # Note: We must still ensure the main jar is readable for the Docker build
+          chmod a+r target/*.jar || true
 
       # 6. Docker login
       - name: Log in to Docker Hub
