@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -54,34 +55,41 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> userSignup(@RequestBody SignUpRequest request) {
 
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("User already exists");
+        try {
+            // 1. Validation
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new RuntimeException("User already exists");
+            }
+
+            // 2. Save user
+            Role role = roleRepository.findByName(request.getRole());
+
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setEmail(request.getEmail());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setRole(role);
+
+            user = userRepository.save(user);
+
+            // 3. Prepare event
+            UserRegisteredEvent userRegisteredEvent = new UserRegisteredEvent();
+            userRegisteredEvent.setUsername(request.getUsername());
+            userRegisteredEvent.setEmail(request.getEmail());
+
+            // 4. Send to Kafka — now catches errors
+            producer.userRegistered("user-registered", userRegisteredEvent);
+
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+
+            // Kafka is down OR topic missing OR serialization issue
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send Kafka event: " + e.getMessage());
         }
-
-        Role role = roleRepository.findByName(request.getRole());
-
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(role);
-
-        user = userRepository.save(user);
-
-        Set<GrantedAuthority> authorities = user.getRole().getPermissions()
-                .stream()
-                .map(p -> new SimpleGrantedAuthority(p.getName()))
-                .collect(Collectors.toSet());
-
-        UserRegisteredEvent userRegisteredEvent = new UserRegisteredEvent();
-
-        userRegisteredEvent.setUsername(request.getUsername());
-        userRegisteredEvent.setEmail(request.getEmail());
-
-        producer.userRegistered("user-registered", userRegisteredEvent);
-
-        return ResponseEntity.ok(user);
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> userLogin(@RequestBody LoginRequest request){
