@@ -5,28 +5,32 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Data
-@Table(name = "User")
 @Entity
+@Table(name = "user")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator
+    @Column(name = "customer_id", columnDefinition = "CHAR(36)")
+    private UUID id;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank
     private String username;
 
-    @Email(message = "Invalid email")
-    @NotBlank(message = "Email is required")
+    @Email
+    @NotBlank
     private String email;
 
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 8)
     private String password;
 
     @ManyToOne
-    @JoinColumn(name = "role_id")  // FK column in User table
+    @JoinColumn(name = "role_id")
     private Role role;
-
 }
+

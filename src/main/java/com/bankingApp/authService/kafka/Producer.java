@@ -20,7 +20,7 @@ public class Producer {
             kafkaTemplate.send(Topic, userRegisteredEvent).get();
         } catch (Exception e) {
             log.error("Kafka error: {}", e.getMessage(), e);
-            throw new RuntimeException("Unable to send Kafka event");
+            throw new RuntimeException("Unable to send User Registration Kafka event");
         }
     }
 
