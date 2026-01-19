@@ -74,7 +74,7 @@ public class AuthController {
 
             // 3. Prepare event
             UserRegisteredEvent userRegisteredEvent = new UserRegisteredEvent();
-            userRegisteredEvent.setId(user.getCustomer_id());
+            userRegisteredEvent.setId(user.getId());
             userRegisteredEvent.setUsername(request.getUsername());
             userRegisteredEvent.setEmail(request.getEmail());
 
