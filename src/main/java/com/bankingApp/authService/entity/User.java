@@ -15,8 +15,9 @@ import java.util.UUID;
 public class User {
 
     @Id
+    @GeneratedValue
     @UuidGenerator
-    @Column(name = "customer_id", columnDefinition = "CHAR(36)")
+    @Column(name = "customer_id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @NotBlank
