@@ -2,14 +2,18 @@ package com.bankingApp.authService.controller;
 
 import com.bankingApp.authService.dto.LoginRequest;
 import com.bankingApp.authService.dto.SignUpRequest;
+import com.bankingApp.authService.entity.Outbox;
 import com.bankingApp.authService.entity.Role;
 import com.bankingApp.authService.entity.User;
 import com.bankingApp.authService.kafka.Producer;
+import com.bankingApp.authService.repository.OutBoxRepository;
 import com.bankingApp.authService.repository.RoleRepository;
 import com.bankingApp.authService.repository.UserRepository;
 import com.bankingApp.authService.service.UserDetailsServiceImpl;
 import com.bankingApp.authService.utils.JwtUtils;
 import com.bankingApp.shared_events_library.UserRegisteredEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -52,7 +57,11 @@ public class AuthController {
     @Autowired
     private Producer producer;
 
+    @Autowired
+    private OutBoxRepository outBoxRepository;
+
     @PostMapping("/signup")
+    @Transactional
     public ResponseEntity<?> userSignup(@RequestBody SignUpRequest request) {
 
         try {
@@ -72,11 +81,29 @@ public class AuthController {
 
             user = userRepository.save(user);
 
+            UserRegisteredEvent event = new UserRegisteredEvent();
+            event.setId(user.getId());
+            event.setUsername(user.getUsername());
+            event.setEmail(user.getEmail());
+
+            Outbox outbox = new Outbox();
+            outbox.setAggregate_id(user.getId());
+            outbox.setAggregate_type("User");
+            outbox.setType("UserRegisteredEvent");
+            outbox.setPayload(new ObjectMapper().writeValueAsString(event));
+            outbox.setStatus("PENDING");
+            outbox.setTopic("user-registered");
+            outbox.setCreatedAt(LocalDateTime.now());
+
+            outBoxRepository.save(outbox);
+
             // 3. Prepare event
             UserRegisteredEvent userRegisteredEvent = new UserRegisteredEvent();
             userRegisteredEvent.setId(user.getId());
             userRegisteredEvent.setUsername(request.getUsername());
             userRegisteredEvent.setEmail(request.getEmail());
+
+
 
             // 4. Send to Kafka — now catches errors
             producer.userRegistered("user-registered", userRegisteredEvent);

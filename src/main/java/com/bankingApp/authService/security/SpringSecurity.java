@@ -38,8 +38,8 @@ public class SpringSecurity {
                 .csrf((csrf) -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/signup", "/users/login", "/register.html", "/staff/signup", "/staff/login").permitAll()
-                        .requestMatchers("/users/**").authenticated()
+                        .requestMatchers("/user/signup", "/user/login", "/register.html", "/staff/signup", "/staff/login").permitAll()
+                        .requestMatchers("/user/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
