@@ -61,7 +61,6 @@ public class AuthController {
     private OutBoxRepository outBoxRepository;
 
     @PostMapping("/signup")
-    @Transactional
     public ResponseEntity<?> userSignup(@RequestBody SignUpRequest request) {
 
         try {
