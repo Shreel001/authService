@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "userRegistration_outbox")
+@Table(name = "outbox")
 public class Outbox {
 
     @Id
