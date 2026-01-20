@@ -97,17 +97,6 @@ public class AuthController {
 
             outBoxRepository.save(outbox);
 
-            // 3. Prepare event
-            UserRegisteredEvent userRegisteredEvent = new UserRegisteredEvent();
-            userRegisteredEvent.setId(user.getId());
-            userRegisteredEvent.setUsername(request.getUsername());
-            userRegisteredEvent.setEmail(request.getEmail());
-
-
-
-            // 4. Send to Kafka — now catches errors
-            producer.userRegistered("user-registered", userRegisteredEvent);
-
             return ResponseEntity.ok(user);
 
         } catch (Exception e) {
