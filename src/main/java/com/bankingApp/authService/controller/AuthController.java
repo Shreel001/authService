@@ -60,7 +60,11 @@ public class AuthController {
     @Autowired
     private OutBoxRepository outBoxRepository;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping("/signup")
+    @Transactional
     public ResponseEntity<?> userSignup(@RequestBody SignUpRequest request) {
 
         try {
@@ -89,7 +93,7 @@ public class AuthController {
             outbox.setAggregate_id(user.getId());
             outbox.setAggregate_type("User");
             outbox.setType("UserRegisteredEvent");
-            outbox.setPayload(new ObjectMapper().writeValueAsString(event));
+            outbox.setPayload(objectMapper.writeValueAsString(event));
             outbox.setStatus("PENDING");
             outbox.setTopic("user-registered");
             outbox.setCreatedAt(LocalDateTime.now());

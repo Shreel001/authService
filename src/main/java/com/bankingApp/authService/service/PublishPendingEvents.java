@@ -1,6 +1,5 @@
 package com.bankingApp.authService.service;
 
-
 import com.bankingApp.authService.entity.Outbox;
 import com.bankingApp.authService.kafka.Producer;
 import com.bankingApp.authService.repository.OutBoxRepository;
@@ -38,6 +37,8 @@ public class PublishPendingEvents {
 
                 outbox.setStatus("SENT");
                 outbox.setProcessedAt(LocalDateTime.now());
+
+                outBoxRepository.save(outbox);
 
             }catch (Exception e){
                 outbox.setRetries(outbox.getRetries() + 1);

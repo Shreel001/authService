@@ -12,30 +12,35 @@ import java.util.UUID;
 public class Outbox {
 
     @Id
-    @GeneratedValue
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "aggregate_type")
+    @Column(name = "aggregate_type", nullable = false)
     private String aggregate_type;
 
-    @Column(name = "aggregate_id")
+    @Column(name = "aggregate_id", nullable = false)
     private UUID aggregate_id;
 
+    @Column(nullable = false)
     private String type;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String payload;
 
+    @Column(nullable = false)
     private String status;
 
-    private int retries;
+    @Column(nullable = false)
+    private int retries = 0;
 
+    @Column(nullable = false)
     private String topic;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
 
+    private String errorMessage;
 }
