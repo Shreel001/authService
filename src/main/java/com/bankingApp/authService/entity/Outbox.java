@@ -2,8 +2,6 @@ package com.bankingApp.authService.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,11 +11,7 @@ import java.util.UUID;
 public class Outbox {
 
     @Id
-    @GeneratedValue(generator = "snowflake")
-    @GenericGenerator(
-            name = "snowflake",
-            strategy = "com.example.id.SnowflakeIdGenerator"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "aggregate_type", nullable = false)
